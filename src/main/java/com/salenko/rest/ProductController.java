@@ -61,27 +61,11 @@ public class ProductController {
     public @ResponseBody Product save(@RequestBody Product row) {
         if (row.getId() == null) {
             Product rowToinsert = new Product();
-            rowToinsert.setName(row.getName());
-            rowToinsert.setPrice(row.getPrice());
-            rowToinsert.setCalculationType(row.getCalculationType());
-            rowToinsert.setActionValid(row.getActionValid());
-            rowToinsert.setActionCount(row.getActionCount());
-            rowToinsert.setActionPrice(row.getActionPrice());
-            rowToinsert.setGift(row.getGift());
-            rowToinsert.setGiftName(row.getGiftName());
-            rowToinsert.setGiftCount(row.getGiftCount());
+            service.setProductRow(rowToinsert, row);
             row = service.insert(rowToinsert);
         } else {
             Product rowToUpdate = service.findById(row.getId());
-            rowToUpdate.setName(row.getName());
-            rowToUpdate.setPrice(row.getPrice());
-            rowToUpdate.setCalculationType(row.getCalculationType());
-            rowToUpdate.setActionValid(row.getActionValid());
-            rowToUpdate.setActionCount(row.getActionCount());
-            rowToUpdate.setActionPrice(row.getActionPrice());
-            rowToUpdate.setGift(row.getGift());
-            rowToUpdate.setGiftName(row.getGiftName());
-            rowToUpdate.setGiftCount(row.getGiftCount());
+            service.setProductRow(rowToUpdate, row);
             service.update(rowToUpdate);
         }
         return row;

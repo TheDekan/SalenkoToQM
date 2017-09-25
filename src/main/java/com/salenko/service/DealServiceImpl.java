@@ -67,13 +67,13 @@ public class DealServiceImpl implements DealService {
         for (int i = 0; i < checkout.deals.size(); i++) {
             promList.add(new Deal(checkout.deals.get(i).getProduct(), checkout.deals.get(i).getProductCount()));
         }
-        List<Deal> sortedList = DealServiceImpl.getSortedList(promList);
+        List<Deal> aggregatedList = DealServiceImpl.getAggregatedList(promList);
         List<Deal> giftList = new ArrayList<Deal>();
         checkout.setCheck("");
-        if (sortedList.size() > 0) {
+        if (aggregatedList.size() > 0) {
             checkout.setCheck("Name.......Count.......Price" + "\n");
             double totalPrice = 0d;
-            for (Deal deal : sortedList) {
+            for (Deal deal : aggregatedList) {
                 double dealPrice = new BigDecimal(DealServiceImpl.calculatePrice(giftList, deal)).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 checkout.setCheck(checkout.getCheck() + "..." + deal.getProduct().getName() + ".............." + deal.getProductCount() + "..........." + dealPrice + "\n");
                 totalPrice += dealPrice;
@@ -83,7 +83,7 @@ public class DealServiceImpl implements DealService {
             checkout.setCheck(checkout.getCheck() + "Total Price : " + totalPrice + "\n");
             if (giftList.size() > 0) {
                 checkout.setCheck(checkout.getCheck() + "-------------------------------------" + "\n");
-                giftList = DealServiceImpl.getSortedList(giftList);
+                giftList = DealServiceImpl.getAggregatedList(giftList);
                 checkout.setCheck(checkout.getCheck() + "Products you got free:" + "\n");
                 for (Deal deal : giftList) {
                     checkout.setCheck(checkout.getCheck() + deal.getProduct().getGiftName() + ".............." + deal.getProductCount() + "\n");
@@ -93,21 +93,21 @@ public class DealServiceImpl implements DealService {
         return checkout.getCheck();
     }
 
-    public static ArrayList<Deal> getSortedList(List<Deal> deals) {
-        ArrayList<Deal> sortedList = new ArrayList<Deal>();
+    public static ArrayList<Deal> getAggregatedList(List<Deal> deals) {
+        ArrayList<Deal> aggregatedList = new ArrayList<Deal>();
         for (Deal row : deals) {
             boolean added = false;
             String name = row.getProduct().getName();
-            for (int i = 0; i < sortedList.size(); i++)
-                if (sortedList.get(i).getProduct().getName().equals(name)) {
-                    sortedList.get(i).setProductCount(sortedList.get(i).getProductCount() + row.getProductCount());
+            for (int i = 0; i < aggregatedList.size(); i++)
+                if (aggregatedList.get(i).getProduct().getName().equals(name)) {
+                    aggregatedList.get(i).setProductCount(aggregatedList.get(i).getProductCount() + row.getProductCount());
                     added = true;
                     break;
                 }
             if (!added)
-                sortedList.add(row);
+                aggregatedList.add(row);
         }
-        return sortedList;
+        return aggregatedList;
     }
 
     public static double calculatePrice(List<Deal> giftList, Deal deal) {

@@ -19,5 +19,7 @@ public interface ProductService {
     List<Product> sortedFind(int startPosition, int maxResults, String sortFields, String sortDirections);
 
     Long getCount();
+    
+    void setProductRow(Product product, Product row);
 
 }

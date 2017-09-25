@@ -50,4 +50,17 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> sortedFind(int startPosition, int maxResults, String sortFields, String sortDirections) {
         return dao.sortedFind(startPosition, maxResults, sortFields, sortDirections);
     }
+    
+    @Override
+    public void setProductRow(Product product, Product row){
+        product.setName(row.getName());
+        product.setPrice(row.getPrice());
+        product.setCalculationType(row.getCalculationType());
+        product.setActionValid(row.getActionValid());
+        product.setActionCount(row.getActionCount());
+        product.setActionPrice(row.getActionPrice());
+        product.setGift(row.getGift());
+        product.setGiftName(row.getGiftName());
+        product.setGiftCount(row.getGiftCount());        
+    }
 }
