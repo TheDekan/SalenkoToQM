@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html ng-app="price">
+<head>
+    <title>Price control page</title>
+
+    <link rel="stylesheet" href="lib/dependencies/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="lib/dependencies/css/ng-grid.min.css" />
+
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+
+    <script src="lib/dependencies/angular.min.js"></script>
+    <script src="lib/dependencies/angular-resource.min.js"></script>
+    <script src="lib/dependencies/jquery.min.js"></script>
+    <script src="lib/dependencies/ui-bootstrap-tpls.min.js"></script>
+    <script src="lib/dependencies/ng-grid.min.js"></script>
+
+    <script src="script/price.js"></script>
+</head>
+
+<body>
+
+<div id="wrapper">
+    <ul class="menu">
+        <li><a href="/SalenkoToQMTestProj/">Market place</a></li>
+    </ul>
+</div>
+
+<h1>Price control page</h1>
+
+<br/>
+
+<div class="message" ng-controller="alertMessagesController">
+    <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<br>
+
+<div class="grid2" ng-controller="productsListController">
+    <div>
+        <h3>Product List</h3>
+    </div>
+
+    <div class="gridStyle" ng-grid="gridOptions"></div>
+
+    <pagination direction-links="true" boundary-links="true"
+                total-items="price.totalResults" items-per-page="price.pageSize"
+                ng-model="price.currentPage" ng-change="refreshGrid()">
+    </pagination>
+</div>
+
+<div class="form2" ng-controller="productFormController">
+    <div ng-if="product.id == null">
+        <h3>Add product</h3>
+    </div>
+    <div ng-if="product.id != null">
+        <h3>Edit product</h3>
+    </div>
+
+    <div>
+        <form name="productForm" ng-submit="updateProd()" novalidate>
+
+            <div class="form-group" ng-class="{'has-error' : productForm.name.$invalid && productForm.name.$dirty}">
+                <label for="name">Name:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.name.$valid && productForm.name.$dirty}"></span>
+
+                <input id="name" name="name" type="text" class="form-control" maxlength="1"
+                       ng-model="product.name"
+                       required/>
+
+                <p class="help-block" ng-show="productForm.name.$error.required">Add name.</p>
+            </div>
+
+            <div class="form-group" ng-class="{'has-error' : productForm.price.$invalid && productForm.price.$dirty}">
+                <label for="price">Price:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.price.$valid && productForm.price.$dirty}"></span>
+
+                <input id="price" name="price" type="number" class="form-control" min="0.01" max="999.99"
+                       ng-model="product.price" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01"
+                       required >
+
+                <p class="help-block" ng-show="productForm.price.$error.required">Add numerical price.</p>
+                <p class="help-block" ng-show="productForm.price.$error.min">Minimum value = 0,01.</p>
+                <p class="help-block" ng-show="productForm.price.$error.max">Maximum value = 999,99.</p>
+                <p class="help-block" ng-show="productForm.price.$error.pattern">Input example: 23,55.</p>
+            </div>
+            
+            <div class="form-group" ng-class="{'has-error' : productForm.calculationType.$invalid && productForm.calculationType.$dirty}">
+                <label for="calculationType">Calculation type:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.calculationType.$valid && productForm.calculationType.$dirty}"></span>
+
+                <select ng-model="product.calculationType" ng-options="o.v as o.n for o in [{ n: 'Units', v: false }, { n: 'Kilograms', v: true }]" required>
+                </select>
+                
+            </div>
+            
+            <div class="form-group" ng-class="{'has-error' : productForm.actionValid.$invalid && productForm.actionValid.$dirty}">
+                <label for="actionValid">Action?:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.actionValid.$valid && productForm.actionValid.$dirty}"></span>
+
+                <input class="checkbox" type="checkbox" id="actionValid" name="actionValid" ng-model="product.actionValid">
+                
+            </div>
+            
+            <div ng-if="product.actionValid" class="form-group" ng-class="{'has-error' : productForm.actionCount.$invalid && productForm.actionCount.$dirty}">
+                <label for="actionCount">Action count:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.actionCount.$valid && productForm.actionCount.$dirty}"></span>
+
+                <input id="actionCount" name="actionCount" type="number" class="form-control" min="2" max="99"
+                       ng-model="product.actionCount" ng-required="product.actionValid" >
+			
+                <p class="help-block" ng-show="productForm.actionCount.$error.required">Add number of products.</p>                
+                <p class="help-block" ng-show="productForm.actionCount.$error.min">Minimum value = 2.</p>
+                <p class="help-block" ng-show="productForm.actionCount.$error.max">Maximum value = 99.</p>
+            </div>
+            
+            <div ng-if="!product.actionValid">
+               	<div ng-init="product.actionCount = null"></div>
+            </div>
+            
+            <div ng-if="product.actionValid" class="form-group" ng-class="{'has-error' : productForm.actionPrice.$invalid && productForm.actionPrice.$dirty}">
+                <label for="actionPrice">Action price:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.actionPrice.$valid && productForm.actionPrice.$dirty}"></span>
+
+                <input  id="actionPrice" name="actionPrice" type="number" class="form-control" min="0.01" max="999.99"
+                       ng-model="product.actionPrice" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" 
+                       ng-required="product.actionValid" >                       
+				
+                <p class="help-block" ng-show="productForm.actionPrice.$error.required">Add price.</p>                
+                <p class="help-block" ng-show="productForm.actionPrice.$error.min">Minimum value = 0,01.</p>
+                <p class="help-block" ng-show="productForm.actionPrice.$error.max">Maximum value = 999,99.</p>
+                <p class="help-block" ng-show="productForm.actionPrice.$error.pattern">Input example: 23,55.</p>
+            </div>
+            
+            <div ng-if="!product.actionValid">
+               	<div ng-init="product.actionPrice = null"></div>
+            </div>
+            
+            <div ng-if="product.actionValid" class="form-group" ng-class="{'has-error' : productForm.gift.$invalid && productForm.gift.$dirty}">
+                <label for="gift">Gift?:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.gift.$valid && productForm.gift.$dirty}"></span>
+				
+				<input class="checkbox" type="checkbox" ng-model="product.gift" >
+                
+            </div>
+            
+            <div ng-if="!product.actionValid">
+               	<div ng-init="product.gift = false"></div>
+            </div>
+            
+            <div ng-if="product.gift" class="form-group" ng-class="{'has-error' : productForm.giftName.$invalid && productForm.giftName.$dirty}">
+                <label for="giftName">Select a gift:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.giftName.$valid && productForm.giftName.$dirty}"></span>
+				
+				<select
+					id="name" name="giftName" class="form-control" ng-model="product.giftName" ng-required="product.gift">
+					<option ng-repeat="item in productList" ng-value="item.name" ng-selected="item.name == product.giftName">
+						{{item.name}}				  
+					</option>
+				</select>
+
+            </div>
+            
+            <div ng-if="!product.gift">
+               	<div ng-init="product.giftName = null"></div>
+            </div>
+            
+            <div ng-if="product.gift" class="form-group" ng-class="{'has-error' : productForm.giftCount.$invalid && productForm.giftCount.$dirty}">
+                <label for="giftCount">Gift count:</label>
+                <span ng-class="{'glyphicon glyphicon-ok' : productForm.giftCount.$valid && productForm.giftCount.$dirty}"></span>
+
+                <input id="giftCount" name="giftCount" type="number" class="form-control" min="1" max="99"
+                       ng-model="product.giftCount" ng-required="product.gift" >
+
+                <p class="help-block" ng-show="productForm.giftCount.$error.required">Add number of gifts.</p>
+                <p class="help-block" ng-show="productForm.giftCount.$error.min">Minimum value = 1.</p>
+                <p class="help-block" ng-show="productForm.giftCount.$error.max">Maximum value = 99.</p>
+            </div>  
+            
+            <div ng-if="!product.gift">
+               	<div ng-init="product.giftCount = null"></div>
+            </div>          
+            
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" ng-click="clearForm()">Clear</button>
+                <button type="submit" class="btn btn-primary" ng-disabled="productForm.$invalid">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
