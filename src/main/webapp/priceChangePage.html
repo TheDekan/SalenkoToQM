@@ -88,7 +88,8 @@
                 <label for="calculationType">Calculation type:</label>
                 <span ng-class="{'glyphicon glyphicon-ok' : productForm.calculationType.$valid && productForm.calculationType.$dirty}"></span>
 
-                <select ng-model="product.calculationType" ng-options="o.v as o.n for o in [{ n: 'Units', v: false }, { n: 'Kilograms', v: true }]" required>
+                <select id="calculationType" name="calculationType" ng-model="product.calculationType" 
+                	ng-options="o.v as o.n for o in [{ n: 'Units', v: false }, { n: 'Kilograms', v: true }]" required>
                 </select>
                 
             </div>
@@ -139,7 +140,7 @@
                 <label for="gift">Gift?:</label>
                 <span ng-class="{'glyphicon glyphicon-ok' : productForm.gift.$valid && productForm.gift.$dirty}"></span>
 				
-				<input class="checkbox" type="checkbox" ng-model="product.gift" >
+				<input id="gift" name="gift" class="checkbox" type="checkbox" ng-model="product.gift" >
                 
             </div>
             
